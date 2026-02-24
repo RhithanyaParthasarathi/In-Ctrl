@@ -1,0 +1,19 @@
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.iml
+
+# Node
+node_modules/
+dist/
+npm-debug.log
+
+# Java/Spring Boot
+target/
+*.class
+*.jar
+*.war
+
+# Env
+.env
