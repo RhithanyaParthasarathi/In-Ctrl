@@ -1,0 +1,36 @@
+<div class="ingester-container">
+  <div class="header">
+    <h1>In-Ctrl: Verification Documentor</h1>
+    <p>Step 1: Ingest the latest code and AI context.</p>
+  </div>
+
+  <div class="card">
+    <div class="form-group">
+      <label for="githubUrl">GitHub Commit URL <span class="required">*</span></label>
+      <input type="text" id="githubUrl" [(ngModel)]="githubUrl"
+        placeholder="e.g., https://github.com/owner/repo/commit/sha" class="form-control">
+      <small>Paste the direct URL to the commit you want to audit.</small>
+    </div>
+
+    <div class="form-group">
+      <label for="aiChatLog">AI Chat Context (Optional)</label>
+      <textarea id="aiChatLog" [(ngModel)]="aiChatLog" rows="8"
+        placeholder="Paste your conversation with the AI (ChatGPT, Claude, Gemini) that led to these code changes..."
+        class="form-control"></textarea>
+      <small>This context helps the system understand the *intent* behind the code.</small>
+    </div>
+
+    <button class="btn-primary" (click)="onSubmit()" [disabled]="isLoading || !githubUrl">
+      {{ isLoading ? 'Analyzing Commit...' : 'Analyze Commit & Context' }}
+    </button>
+  </div>
+
+  <!-- Error Message Display -->
+  <div class="alert error" *ngIf="errorMessage">
+    <strong>Error:</strong> {{ errorMessage }}
+  </div>
+
+  <!-- Feature B: The Audit Dashboard -->
+  <app-audit-dashboard *ngIf="isDashboardVisible && aiAnalysis" [analysis]="aiAnalysis">
+  </app-audit-dashboard>
+</div>
