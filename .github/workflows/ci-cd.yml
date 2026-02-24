@@ -40,7 +40,7 @@ jobs:
   docker-build-and-push:
     needs: [build-backend, build-frontend]
     runs-on: ubuntu-latest
-    if: github.repository == '<YOUR_GITHUB_USERNAME>/<YOUR_REPO_NAME>' && github.ref == 'refs/heads/main'
+    if: github.repository == 'RhithanyaParthasarathi/In-Ctrl' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
       - name: Log in to Docker Hub
