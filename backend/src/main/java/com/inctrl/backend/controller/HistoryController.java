@@ -37,15 +37,20 @@ public class HistoryController {
         String commitSha = payload.get("commitSha");
         String repoUrl = payload.get("repoUrl");
         String analysisJson = payload.get("analysisJson");
+        String tag = payload.get("tag");
 
         if (commitSha == null || repoUrl == null || analysisJson == null) {
             return ResponseEntity.badRequest().build();
         }
 
         AuditedCommit auditedCommit = repository.findById(commitSha)
-            .orElse(new AuditedCommit(commitSha, repoUrl, analysisJson));
+            .orElse(new AuditedCommit(commitSha, repoUrl, analysisJson, tag));
 
         auditedCommit.setAnalysisJson(analysisJson);
+        if (tag != null) {
+            auditedCommit.setTag(tag);
+        }
+        
         AuditedCommit saved = repository.save(auditedCommit);
         
         return ResponseEntity.ok(saved);

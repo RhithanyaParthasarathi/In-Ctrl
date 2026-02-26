@@ -207,6 +207,30 @@
                     <span class="notes-sha-badge" *ngIf="commitSha">SHA: {{ commitSha.substring(0, 7) }}</span>
                 </div>
                 <div class="card-body">
+                    <!-- Commit Tag Section -->
+                    <div class="tag-input-section" style="margin-bottom: 2rem;">
+                        <label class="dev-input-label"
+                            style="display: block; margin-bottom: 0.5rem; color: #e2e8f0; font-weight: 500;">
+                            Commit Tag / Identifier
+                        </label>
+                        <div style="display: flex; gap: 0.8rem; align-items: stretch;">
+                            <input type="text" [(ngModel)]="commitTag" placeholder="e.g. Auth Feature, Hotfix"
+                                style="flex: 1; background: rgba(15, 23, 42, 0.4); border: 1px solid #334155; color: #fff; padding: 0.6rem 1rem; border-radius: 6px; outline: none; transition: border-color 0.2s;"
+                                onfocus="this.style.borderColor='#38bdf8'" onblur="this.style.borderColor='#334155'">
+
+                            <button class="btn-secondary" (click)="saveCommitTag()" [disabled]="isTagSaving"
+                                style="padding: 0 1.25rem; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); color: #7dd3fc; border-radius: 6px; cursor: pointer; transition: all 0.2s; white-space: nowrap;">
+                                {{ isTagSaving ? 'Saving...' : 'Save Tag' }}
+                            </button>
+                        </div>
+                        <small style="color: #94a3b8; font-size: 0.85rem; display: block; margin-top: 0.5rem;">
+                            <span
+                                [style.color]="tagSavedMessage.includes('✅') ? '#34d399' : (tagSavedMessage.includes('⚠️') ? '#f87171' : '#94a3b8')">
+                                {{ tagSavedMessage || 'A short phrase to find this commit later in the History tab.' }}
+                            </span>
+                        </small>
+                    </div>
+
                     <p class="notes-hint">These notes are saved to the database and will persist between sessions for
                         this commit.</p>
                     <textarea class="notes-textarea" [(ngModel)]="commitNotes" rows="6"

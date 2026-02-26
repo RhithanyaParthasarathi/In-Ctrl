@@ -34,6 +34,12 @@ export class AnalysisComponent implements OnInit {
     isNotesSaving: boolean = false;
     notesSavedMessage: string = '';
 
+    // --- History Tagging ---
+    commitTag: string = '';
+    isTagSaving: boolean = false;
+    tagSavedMessage: string = '';
+    rawAnalysisJson: string = '';
+
     constructor(
         private stateService: AnalysisStateService,
         private apiService: ApiService,
@@ -51,6 +57,7 @@ export class AnalysisComponent implements OnInit {
 
             // Extract SHA from URL (last part if direct commit URL)
             this.commitSha = this.commitUrl?.split('/').pop() || '';
+            this.rawAnalysisJson = this.analysisData.rawJson || JSON.stringify(this.analysis);
 
             // Initialize array to match the number of faults
             this.faultMitigations = new Array(this.analysis?.faults?.length || 0).fill('');
@@ -151,6 +158,40 @@ export class AnalysisComponent implements OnInit {
                 this.isNotesSaving = false;
                 this.notesSavedMessage = '⚠️ Failed: ' + (err.message || 'Server error');
                 this.cdr.detectChanges();
+            }
+        });
+    }
+
+    // --- Tag Saving ---
+    saveCommitTag() {
+        if (!this.commitTag.trim()) return;
+
+        this.isTagSaving = true;
+        this.tagSavedMessage = 'Saving tag...';
+        this.cdr.detectChanges();
+
+        const historyPayload = {
+            commitSha: this.commitSha,
+            repoUrl: this.repoUrl,
+            analysisJson: this.rawAnalysisJson,
+            tag: this.commitTag
+        };
+
+        this.apiService.saveHistory(historyPayload).subscribe({
+            next: () => {
+                this.isTagSaving = false;
+                this.tagSavedMessage = '✅ Tag Saved!';
+                this.cdr.detectChanges();
+                setTimeout(() => {
+                    this.tagSavedMessage = '';
+                    this.cdr.detectChanges();
+                }, 3000);
+            },
+            error: (err) => {
+                this.isTagSaving = false;
+                this.tagSavedMessage = '⚠️ Failed to save tag';
+                this.cdr.detectChanges();
+                console.error("Failed to save tag", err);
             }
         });
     }

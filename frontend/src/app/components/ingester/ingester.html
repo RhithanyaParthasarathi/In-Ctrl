@@ -104,20 +104,38 @@
     </div>
   </div>
 
-  <!-- Sidebar: Saved Repositories -->
-  <div class="sidebar" *ngIf="savedRepos.length > 0">
-    <h3>Saved Repositories</h3>
-    <p class="sidebar-desc">Click to quickly reload a repository.</p>
-
-    <div class="saved-repo-list">
-      <div class="saved-repo-card" *ngFor="let repo of savedRepos" (click)="useSavedRepo(repo)">
-        <div class="repo-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+  <!-- Sidebar: Navigation & Saved Repositories -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <h3>Navigation</h3>
+      <a routerLink="/history" class="history-nav-card">
+        <div class="nav-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
           </svg>
         </div>
-        <div class="repo-url" [title]="repo">{{ repo.replace('https://github.com/', '') }}</div>
+        <div class="nav-text">
+          <h4>View Saved History</h4>
+          <p>Browse your past AI analyses</p>
+        </div>
+        <div class="nav-arrow">&rarr;</div>
+      </a>
+    </div>
+
+    <div *ngIf="savedRepos.length > 0">
+      <h3>Saved Repositories</h3>
+      <p class="sidebar-desc">Click to quickly reload a repository.</p>
+
+      <div class="saved-repo-list">
+        <div class="saved-repo-card" *ngFor="let repo of savedRepos" (click)="useSavedRepo(repo)">
+          <div class="repo-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+            </svg>
+          </div>
+          <div class="repo-url" [title]="repo">{{ repo.replace('https://github.com/', '') }}</div>
+        </div>
       </div>
     </div>
   </div>
-</div>

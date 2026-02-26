@@ -18,15 +18,19 @@ public class AuditedCommit {
     @Column(name = "analysis_json", columnDefinition = "CLOB", nullable = false)
     private String analysisJson;
 
+    @Column(name = "commit_tag")
+    private String tag;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     public AuditedCommit() {}
 
-    public AuditedCommit(String commitSha, String repoUrl, String analysisJson) {
+    public AuditedCommit(String commitSha, String repoUrl, String analysisJson, String tag) {
         this.commitSha = commitSha;
         this.repoUrl = repoUrl;
         this.analysisJson = analysisJson;
+        this.tag = tag;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -38,6 +42,9 @@ public class AuditedCommit {
 
     public String getAnalysisJson() { return analysisJson; }
     public void setAnalysisJson(String analysisJson) { this.analysisJson = analysisJson; }
+
+    public String getTag() { return tag; }
+    public void setTag(String tag) { this.tag = tag; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

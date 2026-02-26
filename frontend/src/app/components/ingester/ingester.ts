@@ -1,14 +1,14 @@
 import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ApiService, IngestRequest, AiAnalysis, CommitInfo } from '../../services/api';
 import { AnalysisStateService } from '../../services/analysis-state.service';
 
 @Component({
   selector: 'app-ingester',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './ingester.html',
   styleUrls: ['./ingester.css']
 })
@@ -220,11 +220,23 @@ export class IngesterComponent implements OnInit {
           // Pass data to state service and navigate
           this.analysisStateService.setAnalysis({
             parsedData: parsedAnalysis,
+            rawJson: response.analysis,
             commitUrl: commitUrl,
             repoUrl: this.repoUrl
           });
 
           this.router.navigate(['/results']);
+
+          // Fire-and-forget background save to history
+          const historyPayload = {
+            commitSha: this.selectedCommit ? this.selectedCommit.sha : commitUrl.split('/').pop(),
+            repoUrl: this.inputMode === 'repo' ? this.repoUrl : commitUrl.substring(0, commitUrl.lastIndexOf('/commit/')),
+            analysisJson: response.analysis
+          };
+          this.apiService.saveHistory(historyPayload).subscribe({
+            next: () => console.log("Background history saved successfully"),
+            error: (err) => console.error("Failed to save background history", err)
+          });
 
         } catch (e) {
           console.error("Failed to parse Gemini JSON", e);
