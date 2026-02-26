@@ -59,6 +59,15 @@
                 </div>
               </div>
             </div>
+
+            <!-- Load More Button -->
+            <div class="load-more-container" *ngIf="commits.length > 0 && hasMoreCommits"
+              style="margin-top: 15px; text-align: center;">
+              <button class="btn-secondary" (click)="fetchCommits(true)" [disabled]="isFetchingCommits"
+                style="background: transparent; border: 1px solid #4a5568; color: #e2e8f0; padding: 8px 16px; border-radius: 6px; cursor: pointer;">
+                {{ isFetchingCommits ? 'Loading...' : 'Load More Commits' }}
+              </button>
+            </div>
           </div>
         </div>
 

@@ -74,11 +74,11 @@ export class ApiService {
   constructor(private http: HttpClient) { }
 
   /**
-   * Fetches the latest commits from a GitHub repository.
+   * Fetches the latest commits from a GitHub repository with pagination.
    */
-  fetchCommits(repoUrl: string): Observable<CommitInfo[]> {
+  fetchCommits(repoUrl: string, page: number = 1): Observable<CommitInfo[]> {
     return this.http.get<CommitInfo[]>(`${this.baseUrl}/audit/commits`, {
-      params: { repoUrl }
+      params: { repoUrl, page: page.toString() }
     });
   }
 
@@ -97,16 +97,16 @@ export class ApiService {
   }
 
   /**
-   * Fetches the developer note for a specific commit SHA.
+   * Fetches the developer note for a specific commit SHA and section.
    */
-  getNote(commitSha: string): Observable<Note> {
-    return this.http.get<Note>(`${this.baseUrl}/notes/${commitSha}`);
+  getNote(commitSha: string, section: string = 'summary'): Observable<Note> {
+    return this.http.get<Note>(`${this.baseUrl}/notes/${commitSha}?section=${section}`);
   }
 
   /**
-   * Saves (or updates) a developer note for a commit SHA.
+   * Saves (or updates) a developer note for a commit SHA and section.
    */
-  saveNote(commitSha: string, content: string): Observable<Note> {
-    return this.http.post<Note>(`${this.baseUrl}/notes`, { commitSha, content });
+  saveNote(commitSha: string, content: string, section: string = 'summary'): Observable<Note> {
+    return this.http.post<Note>(`${this.baseUrl}/notes`, { commitSha, content, section });
   }
 }

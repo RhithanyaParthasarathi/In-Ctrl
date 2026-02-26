@@ -22,6 +22,8 @@ export class IngesterComponent implements OnInit {
   selectedCommit: CommitInfo | null = null;
   isFetchingCommits: boolean = false;
   fetchError: string = '';
+  currentPage: number = 1;
+  hasMoreCommits: boolean = true;
 
   // Manual mode / shared fields
   githubUrl: string = '';
@@ -95,8 +97,9 @@ export class IngesterComponent implements OnInit {
 
   /**
    * Fetch the latest commits from the entered repo URL
+   * @param loadMore Whether to fetch the next page and append
    */
-  fetchCommits() {
+  fetchCommits(loadMore: boolean = false) {
     if (!this.repoUrl) {
       this.fetchError = 'Please enter a GitHub repository URL.';
       return;
@@ -104,13 +107,31 @@ export class IngesterComponent implements OnInit {
 
     this.isFetchingCommits = true;
     this.fetchError = '';
-    this.commits = [];
-    this.selectedCommit = null;
 
-    this.apiService.fetchCommits(this.repoUrl).subscribe({
+    if (!loadMore) {
+      this.currentPage = 1;
+      this.commits = [];
+      this.selectedCommit = null;
+    } else {
+      this.currentPage++;
+    }
+
+    this.apiService.fetchCommits(this.repoUrl, this.currentPage).subscribe({
       next: (commits) => {
         this.isFetchingCommits = false;
-        this.commits = commits;
+
+        if (commits.length < 10) {
+          this.hasMoreCommits = false;
+        } else {
+          this.hasMoreCommits = true;
+        }
+
+        if (loadMore) {
+          this.commits = [...this.commits, ...commits];
+        } else {
+          this.commits = commits;
+        }
+
         // Save to local storage on success
         this.saveRepoUrl(this.repoUrl);
         this.cdr.detectChanges();

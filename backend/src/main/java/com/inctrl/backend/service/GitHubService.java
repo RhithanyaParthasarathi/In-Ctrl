@@ -27,9 +27,10 @@ public class GitHubService {
      * Parses a GitHub repository URL and fetches the latest commits.
      * 
      * @param repoUrl e.g., https://github.com/owner/repo
+     * @param page The page number for pagination (starts at 1)
      * @return List of CommitInfo DTOs with sha, message, author, date.
      */
-    public List<CommitInfo> fetchCommitList(String repoUrl) {
+    public List<CommitInfo> fetchCommitList(String repoUrl, int page) {
         // Regex to extract owner and repo from the URL
         Pattern pattern = Pattern.compile("github\\.com/([^/]+)/([^/]+)");
         Matcher matcher = pattern.matcher(repoUrl);
@@ -38,7 +39,7 @@ public class GitHubService {
             String owner = matcher.group(1);
             String repo = matcher.group(2).replaceAll("\\.git$", "");
 
-            String apiUrl = String.format("https://api.github.com/repos/%s/%s/commits?per_page=10", owner, repo);
+            String apiUrl = String.format("https://api.github.com/repos/%s/%s/commits?per_page=10&page=%d", owner, repo, page);
 
             try {
                 ResponseEntity<String> response = restTemplate.getForEntity(apiUrl, String.class);

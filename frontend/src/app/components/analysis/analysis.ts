@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -37,7 +37,8 @@ export class AnalysisComponent implements OnInit {
     constructor(
         private stateService: AnalysisStateService,
         private apiService: ApiService,
-        private router: Router
+        private router: Router,
+        private cdr: ChangeDetectorRef
     ) { }
 
     ngOnInit() {
@@ -55,7 +56,10 @@ export class AnalysisComponent implements OnInit {
             this.faultMitigations = new Array(this.analysis?.faults?.length || 0).fill('');
 
             // Load persisted notes for this commit
+            console.log("Analysis Component Init: commitSha IS: ", this.commitSha);
             this.loadNotes();
+        } else {
+            console.log("Analysis Component Init: NO ANALYSIS DATA FOUND!");
         }
     }
 
@@ -104,28 +108,49 @@ export class AnalysisComponent implements OnInit {
     }
 
     // --- Notes Methods (Commit F) ---
-    loadNotes() {
+    loadNotes(section: string = 'summary') {
+        console.log("loadNotes called for section:", section, "commitSha:", this.commitSha);
         if (!this.commitSha) return;
-        this.apiService.getNote(this.commitSha).subscribe({
-            next: (note) => { this.commitNotes = note?.content || ''; },
-            error: () => { /* Note doesn't exist yet - that's fine */ }
+        this.apiService.getNote(this.commitSha, section).subscribe({
+            next: (note) => {
+                console.log("loadNotes success:", note);
+                this.commitNotes = note?.content || '';
+            },
+            error: (err) => {
+                console.log("loadNotes error (expected if new note):", err);
+            }
         });
     }
 
-    saveNotes() {
-        if (!this.commitSha) return;
-        this.isNotesSaving = true;
-        this.notesSavedMessage = '';
+    saveNotes(section: string = 'summary') {
+        console.log("saveNotes CLICKED! commitSha:", this.commitSha, "content length:", this.commitNotes.length);
+        if (!this.commitSha) {
+            console.error("saveNotes FAILED: commitSha is falsy");
+            this.notesSavedMessage = '⚠️ Error: Missing Commit SHA';
+            this.cdr.detectChanges();
+            return;
+        }
 
-        this.apiService.saveNote(this.commitSha, this.commitNotes).subscribe({
-            next: () => {
+        this.isNotesSaving = true;
+        this.notesSavedMessage = 'Saving...';
+        this.cdr.detectChanges();
+
+        this.apiService.saveNote(this.commitSha, this.commitNotes, section).subscribe({
+            next: (res) => {
+                console.log("saveNotes API SUCCESS:", res);
                 this.isNotesSaving = false;
                 this.notesSavedMessage = '✅ Notes saved!';
-                setTimeout(() => { this.notesSavedMessage = ''; }, 3000);
+                this.cdr.detectChanges();
+                setTimeout(() => {
+                    this.notesSavedMessage = '';
+                    this.cdr.detectChanges();
+                }, 3000);
             },
-            error: () => {
+            error: (err) => {
+                console.error("saveNotes API ERROR:", err);
                 this.isNotesSaving = false;
-                this.notesSavedMessage = '⚠️ Failed to save notes.';
+                this.notesSavedMessage = '⚠️ Failed: ' + (err.message || 'Server error');
+                this.cdr.detectChanges();
             }
         });
     }
