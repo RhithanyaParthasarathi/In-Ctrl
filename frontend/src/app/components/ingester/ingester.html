@@ -20,8 +20,8 @@
       <div class="form-group">
         <label for="repoUrl">GitHub Repository URL <span class="required">*</span></label>
         <div class="input-with-button">
-          <input type="text" id="repoUrl" [(ngModel)]="repoUrl"
-            placeholder="e.g., https://github.com/owner/repo" class="form-control">
+          <input type="text" id="repoUrl" [(ngModel)]="repoUrl" placeholder="e.g., https://github.com/owner/repo"
+            class="form-control">
           <button class="btn-fetch" (click)="fetchCommits()" [disabled]="isFetchingCommits || !repoUrl">
             {{ isFetchingCommits ? 'Fetching...' : 'Fetch Commits' }}
           </button>
@@ -43,8 +43,7 @@
       <!-- Commit List -->
       <div class="commit-list" *ngIf="commits.length > 0">
         <label class="commit-list-label">Select a Commit to Analyze:</label>
-        <div class="commit-item" *ngFor="let commit of commits"
-          [class.selected]="selectedCommit?.sha === commit.sha"
+        <div class="commit-item" *ngFor="let commit of commits" [class.selected]="selectedCommit?.sha === commit.sha"
           (click)="selectCommit(commit)">
           <div class="commit-radio">
             <span class="radio-dot" [class.active]="selectedCommit?.sha === commit.sha"></span>
