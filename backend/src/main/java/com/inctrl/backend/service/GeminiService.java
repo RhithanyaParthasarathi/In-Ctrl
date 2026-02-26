@@ -87,4 +87,64 @@ public class GeminiService {
             throw new RuntimeException("Failed to analyze commit with Gemini: " + e.getMessage(), e);
         }
     }
+
+    /**
+     * Answers a user's question about a commit using the raw diff as context.
+     * Returns a Markdown-formatted answer that may include specific code references.
+     */
+    public String chatWithCommit(String githubDiffJson, String developerContext, String question) {
+        String systemPrompt = """
+                You are an expert Senior Staff Software Engineer acting as a personal code mentor.
+                The developer has just reviewed a Git Commit Diff and has a question about it.
+
+                Your job is to answer the developer's question clearly and concisely.
+                Rules:
+                - Use the provided Git Diff as your source of truth.
+                - When referencing code, ALWAYS quote the exact lines from the diff using Markdown code blocks with the appropriate language tag (e.g. ```java, ```typescript).
+                - Reference specific line changes (lines starting with + or -) when relevant.
+                - Keep the answer focused on the question asked.
+                - Format your full response in Markdown.
+                """;
+
+        String userPrompt = String.format(
+                "Git Diff Context:\n%s\n\nDeveloper Context: %s\n\nDeveloper's Question: %s",
+                githubDiffJson,
+                (developerContext != null && !developerContext.isEmpty()) ? developerContext : "No extra context provided.",
+                question);
+
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="
+                + geminiApiKey;
+
+        try {
+            Map<String, Object> requestBody = Map.of(
+                    "system_instruction", Map.of(
+                            "parts", Map.of(
+                                    "text", systemPrompt)),
+                    "contents", List.of(
+                            Map.of(
+                                    "parts", List.of(
+                                            Map.of("text", userPrompt)))));
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<String> entity = new HttpEntity<>(objectMapper.writeValueAsString(requestBody), headers);
+
+            String responseStr = restTemplate.postForObject(url, entity, String.class);
+
+            Map<String, Object> responseMap = objectMapper.readValue(responseStr, Map.class);
+            List<Map<String, Object>> candidates = (List<Map<String, Object>>) responseMap.get("candidates");
+            if (candidates != null && !candidates.isEmpty()) {
+                Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
+                List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
+                if (parts != null && !parts.isEmpty()) {
+                    return (String) parts.get(0).get("text");
+                }
+            }
+            throw new RuntimeException("Unexpected response format from Gemini API");
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to chat with Gemini: " + e.getMessage(), e);
+        }
+    }
 }

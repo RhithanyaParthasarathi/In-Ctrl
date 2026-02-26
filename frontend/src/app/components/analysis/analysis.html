@@ -25,11 +25,20 @@
     <!-- Analysis Dashboard -->
     <div *ngIf="analysis" class="dashboard-grid">
 
-        <!-- Left Column: Summary & Tech -->
+        <!-- Left Column: Summary, Tech & Chat -->
         <div class="left-column">
             <div class="card summary-card">
                 <div class="card-header">
-                    <span class="icon">📝</span>
+                    <span class="icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                    </span>
                     <h3>Logic Summary</h3>
                 </div>
                 <div class="card-body">
@@ -47,19 +56,73 @@
                     <button class="btn-acknowledge" (click)="onAcknowledge()">I Acknowledge</button>
                 </div>
                 <div class="card-footer success-footer" *ngIf="hasAcknowledged">
-                    <span class="icon">✅</span> Acknowledged Mastered Logic
+                    <span class="icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                    </span> Acknowledged Mastered Logic
                 </div>
             </div>
 
-            <!-- We will eventually add the AI Tech Chat box here in Commit D -->
+            <!-- Commit D & E: AI Q&A Chat -->
+            <div class="card chat-card">
+                <div class="card-header">
+                    <span class="icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </span>
+                    <h3>Ask About This Commit</h3>
+                </div>
+
+                <!-- Messages Window -->
+                <div class="chat-messages" id="chatWindow">
+                    <div *ngIf="chatMessages.length === 0" class="chat-placeholder">
+                        <p>Ask Gemini anything about this commit — technologies used, why a pattern was chosen,
+                            potential risks, etc.</p>
+                    </div>
+                    <div *ngFor="let msg of chatMessages" class="chat-bubble"
+                        [ngClass]="msg.role === 'user' ? 'bubble-user' : 'bubble-ai'">
+                        <div *ngIf="msg.role === 'ai'" [innerHTML]="msg.content" class="markdown-body"></div>
+                        <span *ngIf="msg.role === 'user'">{{ msg.content }}</span>
+                    </div>
+                    <div *ngIf="isChatLoading" class="chat-bubble bubble-ai loading-bubble">
+                        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    </div>
+                </div>
+
+                <!-- Input Row -->
+                <div class="chat-input-row">
+                    <textarea class="chat-input" [(ngModel)]="currentQuestion" (keydown)="onChatKeydown($event)"
+                        placeholder="e.g. Why was JPA used instead of JDBC here?" rows="2" [disabled]="isChatLoading">
+                    </textarea>
+                    <button class="chat-send-btn" (click)="sendChatMessage()"
+                        [disabled]="isChatLoading || !currentQuestion.trim()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <!-- Right Column: Alternatives & Faults -->
+        <!-- Right Column: Alternatives, Faults & Notes -->
         <div class="right-column">
             <!-- Feature C: Trade-offs / Alternatives -->
             <div class="card alternatives-card">
                 <div class="card-header">
-                    <span class="icon">🛤️</span>
+                    <span class="icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 8l4 4-4 4M8 12h8"></path>
+                        </svg>
+                    </span>
                     <h3>Alternative Paths Considered</h3>
                 </div>
                 <div class="card-body">
@@ -70,8 +133,15 @@
                 </div>
                 <div class="card-notes">
                     <div class="dev-input-section">
-                        <label class="dev-input-label">📝 Your Notes &mdash; Acknowledge and note anything about these
-                            alternatives</label>
+                        <label class="dev-input-label">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ec4899"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                style="vertical-align: text-bottom; margin-right: 4px;">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                            Your Notes &mdash; Acknowledge and note anything about these alternatives
+                        </label>
                         <textarea class="dev-textarea" [(ngModel)]="alternativesNote" rows="3"
                             placeholder="Why you chose your current approach, trade-offs considered, etc..."></textarea>
                     </div>
@@ -81,16 +151,41 @@
             <!-- Feature D: Fracture Points / Faults -->
             <div class="card faults-card">
                 <div class="card-header">
-                    <span class="icon">⚠️</span>
+                    <span class="icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                            </path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </span>
                     <h3>Potential Fracture Points</h3>
                 </div>
                 <div class="card-body">
                     <div class="fault-item" *ngFor="let fault of analysis.faults; let i = index">
-                        <h4 class="fault-point"><span class="icon">🎯</span> {{ fault.point }}</h4>
+                        <h4 class="fault-point">
+                            <span class="icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fca5a5"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <circle cx="12" cy="12" r="6"></circle>
+                                    <circle cx="12" cy="12" r="2"></circle>
+                                </svg>
+                            </span>
+                            {{ fault.point }}
+                        </h4>
                         <p class="fault-risk">{{ fault.risk }}</p>
                         <div class="dev-input-section">
-                            <label class="dev-input-label">🛡️ Your Mitigation Plan — How will you address this
-                                risk?</label>
+                            <label class="dev-input-label">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                    style="vertical-align: text-bottom; margin-right: 4px;">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                </svg>
+                                Your Mitigation Plan — How will you address this risk?
+                            </label>
                             <textarea class="dev-textarea fault-textarea" [(ngModel)]="faultMitigations[i]" rows="3"
                                 placeholder="Document your safety plan or mitigation strategy for this risk..."></textarea>
                         </div>
@@ -98,7 +193,43 @@
                 </div>
             </div>
 
-            <!-- We will eventually add Persistent Commit Notes here in Commit F -->
+            <!-- Commit F: Persistent Developer Notes -->
+            <div class="card notes-card">
+                <div class="card-header">
+                    <span class="icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                        </svg>
+                    </span>
+                    <h3>Developer Notes</h3>
+                    <span class="notes-sha-badge" *ngIf="commitSha">SHA: {{ commitSha.substring(0, 7) }}</span>
+                </div>
+                <div class="card-body">
+                    <p class="notes-hint">These notes are saved to the database and will persist between sessions for
+                        this commit.</p>
+                    <textarea class="notes-textarea" [(ngModel)]="commitNotes" rows="6"
+                        placeholder="Document your understanding, decisions, or anything you want to remember about this commit...">
+                    </textarea>
+                </div>
+                <div class="card-footer notes-footer">
+                    <span class="notes-save-message"
+                        [ngClass]="notesSavedMessage.includes('⚠️') ? 'save-error' : 'save-success'">
+                        {{ notesSavedMessage }}
+                    </span>
+                    <button class="btn-save-notes" (click)="saveNotes()" [disabled]="isNotesSaving">
+                        <svg *ngIf="!isNotesSaving" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            style="vertical-align: text-bottom; margin-right: 6px;">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                        {{ isNotesSaving ? 'Saving...' : 'Save Notes' }}
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
