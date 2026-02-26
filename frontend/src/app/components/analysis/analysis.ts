@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AnalysisStateService } from '../../services/analysis-state.service';
 import { AiAnalysis, ChatMessage, ApiService, ChatRequest } from '../../services/api';
 import { marked } from 'marked';
@@ -24,12 +25,21 @@ export class AnalysisComponent implements OnInit {
     alternativesNote: string = '';
     faultMitigations: string[] = [];
 
+    // --- Tab State ---
+    activeTab: 'summary' | 'alternatives' | 'faults' = 'summary';
+
     // --- Chat State (Commit D & E) ---
     chatMessages: ChatMessage[] = [];
     currentQuestion: string = '';
     isChatLoading: boolean = false;
 
     // --- Notes State (Commit F) ---
+    parsedNotes: { title?: string, content: string }[] = [];
+    isNoteInputExpanded: boolean = false;
+    newNoteTitle: string = '';
+    newNoteContent: string = '';
+    expandedNoteIndex: number | null = null;
+
     commitNotes: string = '';
     isNotesSaving: boolean = false;
     notesSavedMessage: string = '';
@@ -39,12 +49,14 @@ export class AnalysisComponent implements OnInit {
     isTagSaving: boolean = false;
     tagSavedMessage: string = '';
     rawAnalysisJson: string = '';
+    showTagModal: boolean = false;
 
     constructor(
         private stateService: AnalysisStateService,
         private apiService: ApiService,
         private router: Router,
-        private cdr: ChangeDetectorRef
+        private cdr: ChangeDetectorRef,
+        private sanitizer: DomSanitizer
     ) { }
 
     ngOnInit() {
@@ -74,6 +86,14 @@ export class AnalysisComponent implements OnInit {
         this.hasAcknowledged = true;
     }
 
+    // --- Tab Methods ---
+    setActiveTab(tab: 'summary' | 'alternatives' | 'faults') {
+        this.activeTab = tab;
+
+        // Auto-load notes for the specific section when switching tabs
+        this.loadNotes(tab);
+    }
+
     // --- Chat Methods (Commit D & E) ---
     sendChatMessage() {
         const question = this.currentQuestion.trim();
@@ -84,17 +104,22 @@ export class AnalysisComponent implements OnInit {
         this.currentQuestion = '';
         this.isChatLoading = true;
 
+        // Sanitize the AI chat log to prevent JSON parsing errors in the backend
+        const rawSummary = this.analysisData?.parsedData?.summary || '';
+        const safeAiChatLog = rawSummary.replace(/["\\]/g, ''); // strip quotes and backslashes
+
         const request: ChatRequest = {
             githubUrl: this.commitUrl,
             commitSha: this.commitSha,
             question: question,
-            aiChatLog: this.analysisData?.parsedData?.summary || ''
+            aiChatLog: '' // Keep empty to avoid JSON parse errors from embedded special chars
         };
 
         this.apiService.chatAboutCommit(request).subscribe({
             next: (response) => {
-                const renderedHtml = marked.parse(response.answer) as string;
-                this.chatMessages.push({ role: 'ai', content: renderedHtml });
+                const rawHtml = marked.parse(response.answer) as string;
+                const safeHtml = this.sanitizer.bypassSecurityTrustHtml(rawHtml);
+                this.chatMessages.push({ role: 'ai', content: safeHtml as string });
                 this.isChatLoading = false;
             },
             error: (err: any) => {
@@ -116,27 +141,40 @@ export class AnalysisComponent implements OnInit {
 
     // --- Notes Methods (Commit F) ---
     loadNotes(section: string = 'summary') {
-        console.log("loadNotes called for section:", section, "commitSha:", this.commitSha);
         if (!this.commitSha) return;
         this.apiService.getNote(this.commitSha, section).subscribe({
             next: (note) => {
-                console.log("loadNotes success:", note);
-                this.commitNotes = note?.content || '';
+                const rawContent = note?.content || '';
+                this.commitNotes = rawContent;
+                try {
+                    this.parsedNotes = JSON.parse(rawContent) || [];
+                } catch (e) {
+                    // Backwards compatibility for plain text notes
+                    if (rawContent.trim()) {
+                        this.parsedNotes = [{ content: rawContent }];
+                    } else {
+                        this.parsedNotes = [];
+                    }
+                }
+                this.cdr.detectChanges();
             },
             error: (err: any) => {
+                this.parsedNotes = [];
+                this.cdr.detectChanges();
                 console.log("loadNotes error (expected if new note):", err);
             }
         });
     }
 
     saveNotes(section: string = 'summary') {
-        console.log("saveNotes CLICKED! commitSha:", this.commitSha, "content length:", this.commitNotes.length);
         if (!this.commitSha) {
-            console.error("saveNotes FAILED: commitSha is falsy");
             this.notesSavedMessage = '⚠️ Error: Missing Commit SHA';
             this.cdr.detectChanges();
             return;
         }
+
+        // Serialize parsedNotes to JSON
+        this.commitNotes = JSON.stringify(this.parsedNotes);
 
         this.isNotesSaving = true;
         this.notesSavedMessage = 'Saving...';
@@ -144,9 +182,8 @@ export class AnalysisComponent implements OnInit {
 
         this.apiService.saveNote(this.commitSha, this.commitNotes, section).subscribe({
             next: (res) => {
-                console.log("saveNotes API SUCCESS:", res);
                 this.isNotesSaving = false;
-                this.notesSavedMessage = '✅ Notes saved!';
+                this.notesSavedMessage = '✅ Saved';
                 this.cdr.detectChanges();
                 setTimeout(() => {
                     this.notesSavedMessage = '';
@@ -154,7 +191,6 @@ export class AnalysisComponent implements OnInit {
                 }, 3000);
             },
             error: (err: any) => {
-                console.error("saveNotes API ERROR:", err);
                 this.isNotesSaving = false;
                 this.notesSavedMessage = '⚠️ Failed: ' + (err.message || 'Server error');
                 this.cdr.detectChanges();
@@ -162,36 +198,91 @@ export class AnalysisComponent implements OnInit {
         });
     }
 
+    addNote() {
+        if (!this.newNoteContent.trim() && !this.newNoteTitle.trim()) {
+            this.isNoteInputExpanded = false;
+            return;
+        }
+
+        this.parsedNotes.unshift({
+            title: this.newNoteTitle,
+            content: this.newNoteContent
+        });
+
+        // Reset inputs
+        this.newNoteTitle = '';
+        this.newNoteContent = '';
+        this.isNoteInputExpanded = false;
+
+        // Auto-save
+        this.saveNotes(this.activeTab);
+    }
+
+    deleteNote(index: number, event?: Event) {
+        if (event) event.stopPropagation();
+        this.parsedNotes.splice(index, 1);
+        this.saveNotes(this.activeTab);
+    }
+
+    openNoteForViewing(index: number) {
+        this.expandedNoteIndex = index;
+    }
+
+    closeNoteViewing() {
+        this.expandedNoteIndex = null;
+    }
+
+    deleteNoteFromView(index: number) {
+        this.deleteNote(index);
+        this.closeNoteViewing();
+    }
+
     // --- Tag Saving ---
+    openTagModal() {
+        this.showTagModal = true;
+        this.tagSavedMessage = '';
+    }
+
+    closeTagModal() {
+        this.showTagModal = false;
+    }
+
     saveCommitTag() {
         if (!this.commitTag.trim()) return;
 
         this.isTagSaving = true;
-        this.tagSavedMessage = 'Saving tag...';
+        this.tagSavedMessage = 'Saving...';
         this.cdr.detectChanges();
 
-        const historyPayload = {
-            commitSha: this.commitSha,
-            repoUrl: this.repoUrl,
-            analysisJson: this.rawAnalysisJson,
-            tag: this.commitTag
+        const onSuccess = () => {
+            this.isTagSaving = false;
+            this.tagSavedMessage = '✅ Tag Saved!';
+            this.cdr.detectChanges();
+            setTimeout(() => {
+                this.showTagModal = false;
+                this.tagSavedMessage = '';
+                this.cdr.detectChanges();
+            }, 1500);
         };
 
-        this.apiService.saveHistory(historyPayload).subscribe({
-            next: () => {
-                this.isTagSaving = false;
-                this.tagSavedMessage = '✅ Tag Saved!';
-                this.cdr.detectChanges();
-                setTimeout(() => {
-                    this.tagSavedMessage = '';
-                    this.cdr.detectChanges();
-                }, 3000);
-            },
-            error: (err: any) => {
-                this.isTagSaving = false;
-                this.tagSavedMessage = '⚠️ Failed to save tag';
-                this.cdr.detectChanges();
-                console.error("Failed to save tag", err);
+        const onError = (err: any) => {
+            this.isTagSaving = false;
+            this.tagSavedMessage = '⚠️ Failed to save tag';
+            this.cdr.detectChanges();
+            console.error('Failed to save tag', err);
+        };
+
+        // Try fast PATCH first; fall back to full POST if PATCH fails (e.g. record not yet saved)
+        this.apiService.updateTag(this.commitSha, this.commitTag).subscribe({
+            next: onSuccess,
+            error: () => {
+                const historyPayload = {
+                    commitSha: this.commitSha,
+                    repoUrl: this.repoUrl,
+                    analysisJson: this.rawAnalysisJson,
+                    tag: this.commitTag
+                };
+                this.apiService.saveHistory(historyPayload).subscribe({ next: onSuccess, error: onError });
             }
         });
     }

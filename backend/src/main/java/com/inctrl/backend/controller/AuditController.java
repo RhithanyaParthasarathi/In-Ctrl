@@ -82,7 +82,9 @@ public class AuditController {
             return ResponseEntity.ok(new ChatResponse(answer));
 
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new ChatResponse("Error: " + e.getMessage()));
+            // Return 200 so the frontend can display the error in the chat UI
+            String msg = e.getMessage() != null ? e.getMessage() : "Unknown error";
+            return ResponseEntity.ok(new ChatResponse("⚠️ " + msg));
         }
     }
 }

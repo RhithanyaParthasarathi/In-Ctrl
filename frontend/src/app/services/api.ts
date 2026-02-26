@@ -52,9 +52,11 @@ export interface ChatResponse {
   answer: string;
 }
 
+import { SafeHtml } from '@angular/platform-browser';
+
 export interface ChatMessage {
   role: 'user' | 'ai';
-  content: string;
+  content: string | SafeHtml;
 }
 
 // --- Note Interface ---
@@ -132,5 +134,12 @@ export class ApiService {
    */
   saveHistory(payload: any): Observable<AuditedCommit> {
     return this.http.post<AuditedCommit>(`${this.baseUrl}/history`, payload);
+  }
+
+  /**
+   * Lightweight update: patches only the tag field of an existing commit record.
+   */
+  updateTag(commitSha: string, tag: string): Observable<AuditedCommit> {
+    return this.http.patch<AuditedCommit>(`${this.baseUrl}/history/${commitSha}/tag`, { tag });
   }
 }

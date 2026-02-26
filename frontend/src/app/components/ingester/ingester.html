@@ -90,10 +90,33 @@
           <small>This context helps the system understand the *intent* behind the code.</small>
         </div>
 
-        <button class="btn-primary" (click)="onSubmit()"
-          [disabled]="isLoading || (inputMode === 'repo' && !selectedCommit) || (inputMode === 'manual' && !githubUrl)">
-          {{ isLoading ? 'Analyzing Commit...' : 'Analyze Commit & Context' }}
+        <button class="btn-primary btn-analyze" (click)="onSubmit()"
+          [disabled]="isLoading || (inputMode === 'repo' && !selectedCommit) || (inputMode === 'manual' && !githubUrl)"
+          [class.loading]="isLoading">
+          <ng-container *ngIf="!isLoading">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              style="margin-right: 8px;">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            Analyze Commit &amp; Context
+          </ng-container>
+          <ng-container *ngIf="isLoading">
+            <svg class="spin-ring" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5" style="margin-right: 8px;">
+              <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path>
+            </svg>
+            Analyzing...
+          </ng-container>
         </button>
+
+        <!-- Loading progress indicator below button -->
+        <div class="analyze-progress" *ngIf="isLoading">
+          <div class="progress-track">
+            <div class="progress-shimmer"></div>
+          </div>
+          <p class="progress-label">AI is analyzing your commit — this may take 15–30 seconds ✨</p>
+        </div>
       </div>
 
       <!-- Error Message Display -->

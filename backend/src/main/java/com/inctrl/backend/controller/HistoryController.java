@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/history")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:4200", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE})
 public class HistoryController {
 
     private final AuditedCommitRepository repository;
@@ -54,5 +54,23 @@ public class HistoryController {
         AuditedCommit saved = repository.save(auditedCommit);
         
         return ResponseEntity.ok(saved);
+    }
+
+    /**
+     * Fast endpoint to update ONLY the tag of an existing commit record.
+     * Avoids re-sending the full analysisJson payload.
+     */
+    @PatchMapping("/{commitSha}/tag")
+    public ResponseEntity<?> updateTag(@PathVariable String commitSha, @RequestBody Map<String, String> payload) {
+        String tag = payload.get("tag");
+        if (tag == null) return ResponseEntity.badRequest().build();
+
+        Optional<AuditedCommit> existing = repository.findById(commitSha);
+        if (existing.isPresent()) {
+            AuditedCommit commit = existing.get();
+            commit.setTag(tag);
+            return ResponseEntity.ok(repository.save(commit));
+        }
+        return ResponseEntity.notFound().build();
     }
 }
