@@ -85,6 +85,28 @@
 /* Commit List */
 .commit-list {
   margin-top: 1.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* Custom Scrollbar for the commit list */
+.commit-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.commit-list::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 4px;
+}
+
+.commit-list::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.4);
+  border-radius: 4px;
+}
+
+.commit-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.7);
 }
 
 .commit-list-label {
@@ -287,6 +309,67 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* History Nav Card in Sidebar */
+.history-nav-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, rgba(88, 28, 135, 0.4), rgba(59, 130, 246, 0.2));
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: var(--border-radius-md);
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  margin-bottom: 1.5rem;
+}
+
+.history-nav-card:hover {
+  transform: translateY(-3px);
+  background: linear-gradient(135deg, rgba(88, 28, 135, 0.6), rgba(59, 130, 246, 0.3));
+  border-color: rgba(139, 92, 246, 0.7);
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.25);
+}
+
+.history-nav-card .nav-icon {
+  color: #a78bfa;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 0.6rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.history-nav-card .nav-text {
+  flex: 1;
+}
+
+.history-nav-card .nav-text h4 {
+  margin: 0 0 0.25rem;
+  font-size: 1.05rem;
+  color: #f8fafc;
+}
+
+.history-nav-card .nav-text p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.history-nav-card .nav-arrow {
+  color: #a78bfa;
+  font-weight: bold;
+  opacity: 0.7;
+  transition: transform 0.2s;
+}
+
+.history-nav-card:hover .nav-arrow {
+  transform: translateX(4px);
+  opacity: 1;
 }
 
 /* Responsive */

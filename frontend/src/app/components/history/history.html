@@ -1,0 +1,96 @@
+<div class="history-container">
+    <div class="header">
+        <div class="header-content">
+            <h2>Saved History</h2>
+            <p>Browse your previously analyzed commits and notes.</p>
+        </div>
+        <a routerLink="/analyze" class="btn-primary" style="text-decoration: none;">+ New Audit</a>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-container" *ngIf="auditedCommits.length > 0">
+        <div class="search-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" [(ngModel)]="searchQuery" placeholder="Search by SHA, Tag, or Keywords...">
+        </div>
+        <div class="repo-filter">
+            <select [(ngModel)]="selectedRepo">
+                <option value="All">All Repositories</option>
+                <option *ngFor="let repo of repositories" [value]="repo">{{ getRepoName(repo) }}</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading your saved history...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="errorMessage" class="alert error">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        {{ errorMessage }}
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && !errorMessage && auditedCommits.length === 0" class="empty-state">
+        <div class="icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+        </div>
+        <h3>No Saved Commits Yet</h3>
+        <p>Analyze a new commit from the Ingester and it will permanently appear here.</p>
+    </div>
+
+    <!-- Grid of Cards -->
+    <div *ngIf="!isLoading && filteredCommits.length > 0" class="grid-container">
+        <div class="history-card" *ngFor="let commit of filteredCommits" (click)="openCommit(commit)">
+
+            <div class="card-repo">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                </svg>
+                {{ getRepoName(commit.repoUrl) }}
+            </div>
+
+            <h3 class="card-sha">
+                <span class="badge">SHA</span> {{ commit.commitSha.substring(0, 7) }}
+                <span class="badge tag-badge" *ngIf="commit.tag"
+                    style="margin-left: auto; display: flex; align-items: center; gap: 4px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                        <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                    </svg>
+                    {{ commit.tag }}
+                </span>
+            </h3>
+
+            <div class="card-date">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                {{ formatDate(commit.createdAt) }}
+            </div>
+
+            <p class="card-summary">
+                {{ getPreviewSummary(commit.analysisJson) }}
+            </p>
+
+            <div class="card-footer">
+                <span>View Full Analysis & Notes &rarr;</span>
+            </div>
+
+        </div>
+    </div>
+</div>

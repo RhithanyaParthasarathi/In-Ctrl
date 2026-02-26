@@ -30,9 +30,11 @@ public class AuditController {
      * Fetches the latest commits from a GitHub repository.
      */
     @GetMapping("/commits")
-    public ResponseEntity<List<CommitInfo>> getCommits(@RequestParam String repoUrl) {
+    public ResponseEntity<List<CommitInfo>> getCommits(
+            @RequestParam String repoUrl,
+            @RequestParam(defaultValue = "1") int page) {
         try {
-            List<CommitInfo> commits = gitHubService.fetchCommitList(repoUrl);
+            List<CommitInfo> commits = gitHubService.fetchCommitList(repoUrl, page);
             return ResponseEntity.ok(commits);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();

@@ -17,9 +17,15 @@
             In-Ctrl analyzes your Git commits with AI, identifies alternative approaches and potential risks,
             and lets you log your reasoning &mdash; so you never ship code you don't fully understand.
         </p>
-        <a routerLink="/analyze" class="btn-cta">
-            Start Analyzing &rarr;
-        </a>
+        <div class="hero-actions" style="display: flex; gap: 1rem; justify-content: center; align-items: center;">
+            <a routerLink="/analyze" class="btn-cta">
+                Start Analyzing &rarr;
+            </a>
+            <a routerLink="/history" class="btn-secondary"
+                style="padding: 0.8rem 1.5rem; text-decoration: none; border: 1px solid var(--card-border); border-radius: 8px; color: var(--text-primary); transition: all 0.2s;">
+                View Saved History
+            </a>
+        </div>
     </div>
 
     <!-- Features Section -->
