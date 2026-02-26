@@ -10,6 +10,13 @@ export interface IngestRequest {
   aiChatLog: string;
 }
 
+export interface CommitInfo {
+  sha: string;
+  message: string;
+  authorName: string;
+  date: string;
+}
+
 export interface AiFault {
   point: string;
   risk: string;
@@ -43,9 +50,19 @@ export class ApiService {
   constructor(private http: HttpClient) { }
 
   /**
+   * Fetches the latest commits from a GitHub repository.
+   */
+  fetchCommits(repoUrl: string): Observable<CommitInfo[]> {
+    return this.http.get<CommitInfo[]>(`${this.baseUrl}/commits`, {
+      params: { repoUrl }
+    });
+  }
+
+  /**
    * Sends the GitHub URL and AI Chat log to the backend for ingestion.
    */
   ingestCommit(request: IngestRequest): Observable<any> {
     return this.http.post(`${this.baseUrl}/ingest`, request);
   }
 }
+

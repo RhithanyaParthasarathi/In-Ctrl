@@ -1,0 +1,25 @@
+.analysis-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+.header h2 {
+    background: var(--gradient-primary);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.header p {
+    color: var(--text-muted);
+}
+
+.header a {
+    color: #a855f7;
+    text-decoration: none;
+}
+
+.header a:hover {
+    text-decoration: underline;
+}
