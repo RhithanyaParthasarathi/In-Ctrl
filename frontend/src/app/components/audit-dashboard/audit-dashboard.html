@@ -41,6 +41,14 @@
                 <p class="alt-justification">{{ alt.justification }}</p>
             </div>
         </div>
+        <div class="card-notes">
+            <div class="dev-input-section">
+                <label class="dev-input-label">📝 Your Notes &mdash; Acknowledge and note anything about these
+                    alternatives</label>
+                <textarea class="dev-textarea" [(ngModel)]="alternativesNote" rows="3"
+                    placeholder="Why you chose your current approach, trade-offs considered, etc..."></textarea>
+            </div>
+        </div>
     </div>
 
     <!-- Feature D: Fracture Points / Faults -->
@@ -50,9 +58,14 @@
             <h3>Potential Fracture Points</h3>
         </div>
         <div class="card-body">
-            <div class="fault-item" *ngFor="let fault of analysis.faults">
+            <div class="fault-item" *ngFor="let fault of analysis.faults; let i = index">
                 <h4 class="fault-point"><span class="icon">🎯</span> {{ fault.point }}</h4>
                 <p class="fault-risk">{{ fault.risk }}</p>
+                <div class="dev-input-section">
+                    <label class="dev-input-label">🛡️ Your Mitigation Plan — How will you address this risk?</label>
+                    <textarea class="dev-textarea fault-textarea" [(ngModel)]="faultMitigations[i]" rows="3"
+                        placeholder="Document your safety plan or mitigation strategy for this risk..."></textarea>
+                </div>
             </div>
         </div>
     </div>

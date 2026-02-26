@@ -242,6 +242,62 @@
     gap: 0.75rem;
 }
 
+/* Card Notes (single textarea at bottom of card) */
+.card-notes {
+    padding: 0 2rem 2rem 2rem;
+}
+
+/* Developer Input Sections (Tasks 1 & 2) */
+.dev-input-section {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.dev-input-label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #cbd5e1;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.02em;
+}
+
+.dev-textarea {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(236, 72, 153, 0.2);
+    border-radius: var(--border-radius-md);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    resize: vertical;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.dev-textarea:focus {
+    outline: none;
+    border-color: rgba(236, 72, 153, 0.5);
+    box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+}
+
+.dev-textarea::placeholder {
+    color: #64748b;
+}
+
+/* Fault-specific textarea accent */
+.fault-textarea {
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.fault-textarea:focus {
+    border-color: rgba(239, 68, 68, 0.5);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
