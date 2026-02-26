@@ -47,7 +47,7 @@ public class GeminiService {
                 (developerContext != null && !developerContext.isEmpty()) ? developerContext : "No context provided.",
                 githubDiffJson);
 
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key="
                 + geminiApiKey;
 
         try {
@@ -112,7 +112,7 @@ public class GeminiService {
                 (developerContext != null && !developerContext.isEmpty()) ? developerContext : "No extra context provided.",
                 question);
 
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key="
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key="
                 + geminiApiKey;
 
         try {
