@@ -1,7 +1,104 @@
 <div class="analysis-container">
     <div class="header">
         <h2>Analysis Results</h2>
-        <p>This page will show your commit analysis. Run an analysis from the <a routerLink="/analyze">Analyze</a> page
-            first.</p>
+        <p *ngIf="commitUrl">Reviewing AI analysis for: <a [href]="commitUrl" target="_blank" class="commit-link">{{
+                commitUrl.split('/').pop()?.substring(0, 7) || 'Commit' }}</a></p>
+        <p *ngIf="!commitUrl">Reviewing AI analysis.</p>
+        <a routerLink="/analyze" class="back-link">&larr; Back to Ingester</a>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!analysis" class="card empty-state">
+        <div class="feature-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+        </div>
+        <h3>No Analysis Data Found</h3>
+        <p>You haven't run an analysis yet, or your session data was cleared.</p>
+        <a routerLink="/analyze" class="btn-primary"
+            style="display: inline-block; width: auto; text-decoration: none;">Go to Ingester</a>
+    </div>
+
+    <!-- Analysis Dashboard -->
+    <div *ngIf="analysis" class="dashboard-grid">
+
+        <!-- Left Column: Summary & Tech -->
+        <div class="left-column">
+            <div class="card summary-card">
+                <div class="card-header">
+                    <span class="icon">📝</span>
+                    <h3>Logic Summary</h3>
+                </div>
+                <div class="card-body">
+                    <p class="summary-text">{{ analysis.summary }}</p>
+
+                    <div class="tech-stack">
+                        <h4>Technologies Detected:</h4>
+                        <div class="tags">
+                            <span class="tag" *ngFor="let tech of analysis.technologies">{{ tech }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer" *ngIf="!hasAcknowledged">
+                    <p class="warning-text">You must acknowledge that you understand the logic added in this commit.</p>
+                    <button class="btn-acknowledge" (click)="onAcknowledge()">I Acknowledge</button>
+                </div>
+                <div class="card-footer success-footer" *ngIf="hasAcknowledged">
+                    <span class="icon">✅</span> Acknowledged Mastered Logic
+                </div>
+            </div>
+
+            <!-- We will eventually add the AI Tech Chat box here in Commit D -->
+        </div>
+
+        <!-- Right Column: Alternatives & Faults -->
+        <div class="right-column">
+            <!-- Feature C: Trade-offs / Alternatives -->
+            <div class="card alternatives-card">
+                <div class="card-header">
+                    <span class="icon">🛤️</span>
+                    <h3>Alternative Paths Considered</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alternative-item" *ngFor="let alt of analysis.alternatives">
+                        <h4 class="alt-method">{{ alt.method }}</h4>
+                        <p class="alt-justification">{{ alt.justification }}</p>
+                    </div>
+                </div>
+                <div class="card-notes">
+                    <div class="dev-input-section">
+                        <label class="dev-input-label">📝 Your Notes &mdash; Acknowledge and note anything about these
+                            alternatives</label>
+                        <textarea class="dev-textarea" [(ngModel)]="alternativesNote" rows="3"
+                            placeholder="Why you chose your current approach, trade-offs considered, etc..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature D: Fracture Points / Faults -->
+            <div class="card faults-card">
+                <div class="card-header">
+                    <span class="icon">⚠️</span>
+                    <h3>Potential Fracture Points</h3>
+                </div>
+                <div class="card-body">
+                    <div class="fault-item" *ngFor="let fault of analysis.faults; let i = index">
+                        <h4 class="fault-point"><span class="icon">🎯</span> {{ fault.point }}</h4>
+                        <p class="fault-risk">{{ fault.risk }}</p>
+                        <div class="dev-input-section">
+                            <label class="dev-input-label">🛡️ Your Mitigation Plan — How will you address this
+                                risk?</label>
+                            <textarea class="dev-textarea fault-textarea" [(ngModel)]="faultMitigations[i]" rows="3"
+                                placeholder="Document your safety plan or mitigation strategy for this risk..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- We will eventually add Persistent Commit Notes here in Commit F -->
+        </div>
     </div>
 </div>
