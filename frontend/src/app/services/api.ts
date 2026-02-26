@@ -64,6 +64,16 @@ export interface Note {
   content: string;
 }
 
+// --- History Interface ---
+export interface AuditedCommit {
+  id?: number;
+  commitSha: string;
+  repoUrl: string;
+  analysisJson: string;
+  createdAt: string;
+  tag?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -108,5 +118,19 @@ export class ApiService {
    */
   saveNote(commitSha: string, content: string, section: string = 'summary'): Observable<Note> {
     return this.http.post<Note>(`${this.baseUrl}/notes`, { commitSha, content, section });
+  }
+
+  /**
+   * Fetches all saved AI analyses from the database history.
+   */
+  getHistory(): Observable<AuditedCommit[]> {
+    return this.http.get<AuditedCommit[]>(`${this.baseUrl}/history`);
+  }
+
+  /**
+   * Saves raw AI analysis to the database history.
+   */
+  saveHistory(payload: any): Observable<AuditedCommit> {
+    return this.http.post<AuditedCommit>(`${this.baseUrl}/history`, payload);
   }
 }
