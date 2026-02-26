@@ -40,12 +40,36 @@ export interface AuditResponse {
   analysis: string; // The JSON string we need to parse
 }
 
+// --- Chat Interfaces ---
+export interface ChatRequest {
+  githubUrl: string;
+  commitSha: string;
+  question: string;
+  aiChatLog: string;
+}
+
+export interface ChatResponse {
+  answer: string;
+}
+
+export interface ChatMessage {
+  role: 'user' | 'ai';
+  content: string;
+}
+
+// --- Note Interface ---
+export interface Note {
+  id?: number;
+  commitSha: string;
+  content: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
   // URL of our Spring Boot Backend
-  private baseUrl = 'http://localhost:8080/api/audit';
+  private baseUrl = 'http://localhost:8080/api';
 
   constructor(private http: HttpClient) { }
 
@@ -53,7 +77,7 @@ export class ApiService {
    * Fetches the latest commits from a GitHub repository.
    */
   fetchCommits(repoUrl: string): Observable<CommitInfo[]> {
-    return this.http.get<CommitInfo[]>(`${this.baseUrl}/commits`, {
+    return this.http.get<CommitInfo[]>(`${this.baseUrl}/audit/commits`, {
       params: { repoUrl }
     });
   }
@@ -62,7 +86,27 @@ export class ApiService {
    * Sends the GitHub URL and AI Chat log to the backend for ingestion.
    */
   ingestCommit(request: IngestRequest): Observable<any> {
-    return this.http.post(`${this.baseUrl}/ingest`, request);
+    return this.http.post(`${this.baseUrl}/audit/ingest`, request);
+  }
+
+  /**
+   * Sends a question about a commit to the backend for AI-powered Q&A.
+   */
+  chatAboutCommit(request: ChatRequest): Observable<ChatResponse> {
+    return this.http.post<ChatResponse>(`${this.baseUrl}/audit/chat`, request);
+  }
+
+  /**
+   * Fetches the developer note for a specific commit SHA.
+   */
+  getNote(commitSha: string): Observable<Note> {
+    return this.http.get<Note>(`${this.baseUrl}/notes/${commitSha}`);
+  }
+
+  /**
+   * Saves (or updates) a developer note for a commit SHA.
+   */
+  saveNote(commitSha: string, content: string): Observable<Note> {
+    return this.http.post<Note>(`${this.baseUrl}/notes`, { commitSha, content });
   }
 }
-

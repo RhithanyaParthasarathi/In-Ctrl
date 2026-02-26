@@ -2,6 +2,8 @@ package com.inctrl.backend.controller;
 
 import com.inctrl.backend.dto.CommitInfo;
 import com.inctrl.backend.dto.IngestRequest;
+import com.inctrl.backend.dto.ChatRequest;
+import com.inctrl.backend.dto.ChatResponse;
 import com.inctrl.backend.service.GitHubService;
 import com.inctrl.backend.service.GeminiService;
 import org.springframework.http.ResponseEntity;
@@ -59,6 +61,26 @@ public class AuditController {
             response.put("status", "error");
             response.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    /**
+     * Handles a user's Q&A question about a specific commit.
+     * Fetches the diff from GitHub and sends it to Gemini with the question.
+     */
+    @PostMapping("/chat")
+    public ResponseEntity<?> chatAboutCommit(@RequestBody ChatRequest request) {
+        try {
+            // Re-fetch the GitHub diff to give Gemini full context
+            String githubDiff = gitHubService.fetchCommitDetails(request.getGithubUrl());
+
+            // Send to Gemini for a markdown-formatted answer with code references
+            String answer = geminiService.chatWithCommit(githubDiff, request.getAiChatLog(), request.getQuestion());
+
+            return ResponseEntity.ok(new ChatResponse(answer));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ChatResponse("Error: " + e.getMessage()));
         }
     }
 }
