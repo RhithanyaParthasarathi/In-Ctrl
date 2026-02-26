@@ -1,11 +1,13 @@
 package com.inctrl.backend.controller;
 
+import com.inctrl.backend.dto.CommitInfo;
 import com.inctrl.backend.dto.IngestRequest;
 import com.inctrl.backend.service.GitHubService;
 import com.inctrl.backend.service.GeminiService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -20,6 +22,19 @@ public class AuditController {
     public AuditController(GitHubService gitHubService, GeminiService geminiService) {
         this.gitHubService = gitHubService;
         this.geminiService = geminiService;
+    }
+
+    /**
+     * Fetches the latest commits from a GitHub repository.
+     */
+    @GetMapping("/commits")
+    public ResponseEntity<List<CommitInfo>> getCommits(@RequestParam String repoUrl) {
+        try {
+            List<CommitInfo> commits = gitHubService.fetchCommitList(repoUrl);
+            return ResponseEntity.ok(commits);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PostMapping("/ingest")

@@ -5,22 +5,82 @@
   </div>
 
   <div class="card">
-    <div class="form-group">
-      <label for="githubUrl">GitHub Commit URL <span class="required">*</span></label>
-      <input type="text" id="githubUrl" [(ngModel)]="githubUrl"
-        placeholder="e.g., https://github.com/owner/repo/commit/sha" class="form-control">
-      <small>Paste the direct URL to the commit you want to audit.</small>
+    <!-- Mode Toggle -->
+    <div class="mode-toggle">
+      <button class="toggle-btn" [class.active]="inputMode === 'repo'" (click)="inputMode = 'repo'">
+        🔍 Browse Repository
+      </button>
+      <button class="toggle-btn" [class.active]="inputMode === 'manual'" (click)="inputMode = 'manual'">
+        🔗 Paste Commit URL
+      </button>
     </div>
 
+    <!-- PRIMARY: Repo Selector Mode -->
+    <div *ngIf="inputMode === 'repo'">
+      <div class="form-group">
+        <label for="repoUrl">GitHub Repository URL <span class="required">*</span></label>
+        <div class="input-with-button">
+          <input type="text" id="repoUrl" [(ngModel)]="repoUrl" placeholder="e.g., https://github.com/owner/repo"
+            class="form-control">
+          <button class="btn-fetch" (click)="fetchCommits()" [disabled]="isFetchingCommits || !repoUrl">
+            {{ isFetchingCommits ? 'Fetching...' : 'Fetch Commits' }}
+          </button>
+        </div>
+        <small>Enter a public GitHub repository to browse its recent commits.</small>
+      </div>
+
+      <!-- Fetch Error -->
+      <div class="alert error" *ngIf="fetchError">
+        <strong>Error:</strong> {{ fetchError }}
+      </div>
+
+      <!-- Loading Spinner -->
+      <div class="commits-loading" *ngIf="isFetchingCommits">
+        <div class="loading-spinner"></div>
+        <span>Loading commits...</span>
+      </div>
+
+      <!-- Commit List -->
+      <div class="commit-list" *ngIf="commits.length > 0">
+        <label class="commit-list-label">Select a Commit to Analyze:</label>
+        <div class="commit-item" *ngFor="let commit of commits" [class.selected]="selectedCommit?.sha === commit.sha"
+          (click)="selectCommit(commit)">
+          <div class="commit-radio">
+            <span class="radio-dot" [class.active]="selectedCommit?.sha === commit.sha"></span>
+          </div>
+          <div class="commit-details">
+            <div class="commit-message">{{ truncateMessage(commit.message) }}</div>
+            <div class="commit-meta">
+              <span class="commit-sha">{{ commit.sha.substring(0, 7) }}</span>
+              <span class="commit-author">{{ commit.authorName }}</span>
+              <span class="commit-date">{{ formatDate(commit.date) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FALLBACK: Manual URL Mode -->
+    <div *ngIf="inputMode === 'manual'">
+      <div class="form-group">
+        <label for="githubUrl">GitHub Commit URL <span class="required">*</span></label>
+        <input type="text" id="githubUrl" [(ngModel)]="githubUrl"
+          placeholder="e.g., https://github.com/owner/repo/commit/sha" class="form-control">
+        <small>Paste the direct URL to the commit you want to audit.</small>
+      </div>
+    </div>
+
+    <!-- AI Chat Context (shared between both modes) -->
     <div class="form-group">
       <label for="aiChatLog">AI Chat Context (Optional)</label>
-      <textarea id="aiChatLog" [(ngModel)]="aiChatLog" rows="8"
+      <textarea id="aiChatLog" [(ngModel)]="aiChatLog" rows="6"
         placeholder="Paste your conversation with the AI (ChatGPT, Claude, Gemini) that led to these code changes..."
         class="form-control"></textarea>
       <small>This context helps the system understand the *intent* behind the code.</small>
     </div>
 
-    <button class="btn-primary" (click)="onSubmit()" [disabled]="isLoading || !githubUrl">
+    <button class="btn-primary" (click)="onSubmit()"
+      [disabled]="isLoading || (inputMode === 'repo' && !selectedCommit) || (inputMode === 'manual' && !githubUrl)">
       {{ isLoading ? 'Analyzing Commit...' : 'Analyze Commit & Context' }}
     </button>
   </div>
