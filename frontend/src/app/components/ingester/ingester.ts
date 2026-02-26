@@ -235,7 +235,7 @@ export class IngesterComponent implements OnInit {
           };
           this.apiService.saveHistory(historyPayload).subscribe({
             next: () => console.log("Background history saved successfully"),
-            error: (err) => console.error("Failed to save background history", err)
+            error: (err: any) => console.error("Failed to save background history", err)
           });
 
         } catch (e) {

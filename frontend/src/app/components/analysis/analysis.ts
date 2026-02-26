@@ -97,7 +97,7 @@ export class AnalysisComponent implements OnInit {
                 this.chatMessages.push({ role: 'ai', content: renderedHtml });
                 this.isChatLoading = false;
             },
-            error: (err) => {
+            error: (err: any) => {
                 this.chatMessages.push({
                     role: 'ai',
                     content: `<p style="color: #f87171;">⚠️ Failed to get a response. Please try again.</p>`
@@ -123,7 +123,7 @@ export class AnalysisComponent implements OnInit {
                 console.log("loadNotes success:", note);
                 this.commitNotes = note?.content || '';
             },
-            error: (err) => {
+            error: (err: any) => {
                 console.log("loadNotes error (expected if new note):", err);
             }
         });
@@ -153,7 +153,7 @@ export class AnalysisComponent implements OnInit {
                     this.cdr.detectChanges();
                 }, 3000);
             },
-            error: (err) => {
+            error: (err: any) => {
                 console.error("saveNotes API ERROR:", err);
                 this.isNotesSaving = false;
                 this.notesSavedMessage = '⚠️ Failed: ' + (err.message || 'Server error');
@@ -187,7 +187,7 @@ export class AnalysisComponent implements OnInit {
                     this.cdr.detectChanges();
                 }, 3000);
             },
-            error: (err) => {
+            error: (err: any) => {
                 this.isTagSaving = false;
                 this.tagSavedMessage = '⚠️ Failed to save tag';
                 this.cdr.detectChanges();

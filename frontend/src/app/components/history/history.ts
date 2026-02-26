@@ -42,7 +42,7 @@ export class HistoryComponent implements OnInit {
                 this.isLoading = false;
                 this.cdr.detectChanges(); // Force UI update
             },
-            error: (err) => {
+            error: (err: any) => {
                 this.errorMessage = 'Failed to load saved history. Please ensure the backend is running.';
                 this.isLoading = false;
                 this.cdr.detectChanges(); // Force UI update
