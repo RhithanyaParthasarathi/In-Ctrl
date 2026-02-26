@@ -1,17 +1,18 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ApiService, IngestRequest, AiAnalysis, CommitInfo } from '../../services/api';
-import { AuditDashboardComponent } from '../audit-dashboard/audit-dashboard';
+import { AnalysisStateService } from '../../services/analysis-state.service';
 
 @Component({
   selector: 'app-ingester',
   standalone: true,
-  imports: [CommonModule, FormsModule, AuditDashboardComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './ingester.html',
   styleUrls: ['./ingester.css']
 })
-export class IngesterComponent {
+export class IngesterComponent implements OnInit {
   // Mode toggle: 'repo' (primary) or 'manual' (fallback)
   inputMode: 'repo' | 'manual' = 'repo';
 
@@ -31,14 +32,57 @@ export class IngesterComponent {
   successData: any = null;
   errorMessage: string = '';
 
-  // Feature B: Parsed AI Analysis Data
-  aiAnalysis: AiAnalysis | null = null;
-  isDashboardVisible: boolean = false;
+  // Saved Repositories
+  savedRepos: string[] = [];
 
   constructor(
     private apiService: ApiService,
+    private analysisStateService: AnalysisStateService,
+    private router: Router,
     private cdr: ChangeDetectorRef
   ) { }
+
+  ngOnInit() {
+    this.loadSavedRepos();
+  }
+
+  /**
+   * Load saved repos from local storage
+   */
+  loadSavedRepos() {
+    const saved = localStorage.getItem('inctrl_saved_repos');
+    if (saved) {
+      this.savedRepos = JSON.parse(saved);
+    }
+  }
+
+  /**
+   * Save a repo URL to local storage
+   */
+  saveRepoUrl(url: string) {
+    if (!url) return;
+    const normalizedUrl = url.replace(/\/+$/, '');
+
+    // Don't add duplicates
+    if (!this.savedRepos.includes(normalizedUrl)) {
+      // Add to beginning of array
+      this.savedRepos.unshift(normalizedUrl);
+      // Keep only the 10 most recent
+      if (this.savedRepos.length > 10) {
+        this.savedRepos.pop();
+      }
+      localStorage.setItem('inctrl_saved_repos', JSON.stringify(this.savedRepos));
+    }
+  }
+
+  /**
+   * Populate from saved repo list
+   */
+  useSavedRepo(url: string) {
+    this.repoUrl = url;
+    this.inputMode = 'repo';
+    this.fetchCommits();
+  }
 
   /**
    * Toggle between repo selector and manual URL input
@@ -67,6 +111,8 @@ export class IngesterComponent {
       next: (commits) => {
         this.isFetchingCommits = false;
         this.commits = commits;
+        // Save to local storage on success
+        this.saveRepoUrl(this.repoUrl);
         this.cdr.detectChanges();
       },
       error: (error) => {
@@ -134,8 +180,6 @@ export class IngesterComponent {
     this.isLoading = true;
     this.errorMessage = '';
     this.successData = null;
-    this.aiAnalysis = null;
-    this.isDashboardVisible = false;
 
     const request: IngestRequest = {
       githubUrl: commitUrl,
@@ -150,14 +194,23 @@ export class IngesterComponent {
 
         try {
           // Parse the AI JSON string returned from the backend
-          this.aiAnalysis = JSON.parse(response.analysis) as AiAnalysis;
-          this.isDashboardVisible = true;
+          const parsedAnalysis = JSON.parse(response.analysis) as AiAnalysis;
+
+          // Pass data to state service and navigate
+          this.analysisStateService.setAnalysis({
+            parsedData: parsedAnalysis,
+            commitUrl: commitUrl,
+            repoUrl: this.repoUrl
+          });
+
+          this.router.navigate(['/results']);
+
         } catch (e) {
           console.error("Failed to parse Gemini JSON", e);
           this.errorMessage = "Failed to parse the AI analysis response.";
+          this.cdr.detectChanges();
         }
 
-        this.cdr.detectChanges(); // Force Angular to update the UI
         console.log('Success:', response);
       },
       error: (error) => {
