@@ -384,6 +384,24 @@
   }
 }
 
+@media (max-width: 768px) {
+  .input-with-button {
+    flex-direction: column;
+  }
+
+  .btn-fetch {
+    width: 100%;
+  }
+
+  .mode-toggle {
+    flex-wrap: wrap;
+  }
+
+  .toggle-btn {
+    min-width: 45%;
+  }
+}
+
 /* ================================================== */
 /* Analyze Button: Loading Spinner & Progress Bar     */
 /* ================================================== */

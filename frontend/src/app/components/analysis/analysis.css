@@ -413,6 +413,50 @@
     }
 }
 
+@media (max-width: 768px) {
+    .analysis-container {
+        padding: 1rem 0.5rem;
+    }
+
+    .header h2 {
+        font-size: 2rem;
+    }
+
+    .tabs-nav {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .tab-btn {
+        width: 100%;
+        padding: 0.75rem 1rem;
+    }
+
+    .card-header {
+        padding: 1rem 1.25rem;
+    }
+
+    .card-header h3 {
+        font-size: 1.2rem;
+    }
+
+    .card-body,
+    .card-notes,
+    .card-footer {
+        padding: 1.25rem;
+    }
+
+    .chat-messages {
+        padding: 1rem;
+        height: 60vh;
+        max-height: 500px;
+    }
+
+    .chat-input-row {
+        padding: 1rem;
+    }
+}
+
 /* ================================================== */
 /* Commit D & E: AI Q&A Chat Styles                   */
 /* ================================================== */
