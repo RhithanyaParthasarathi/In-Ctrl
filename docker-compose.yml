@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   backend:
-    build: ./backend
+    image: rhithanya/in-ctrl-backend:latest
     ports:
       - "8080:8080"
     environment:
@@ -12,7 +12,7 @@ services:
       - SPRING_JPA_DATABASE-PLATFORM=org.hibernate.dialect.H2Dialect
 
   frontend:
-    build: ./frontend
+    image: rhithanya/in-ctrl-frontend:latest
     ports:
       - "80:80"
     depends_on:
