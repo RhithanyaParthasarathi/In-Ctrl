@@ -11,7 +11,8 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/history")
-@CrossOrigin(origins = "http://localhost:4200", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH, RequestMethod.DELETE})
+@CrossOrigin(origins = "*", methods = { RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.PATCH,
+        RequestMethod.DELETE })
 public class HistoryController {
 
     private final AuditedCommitRepository repository;
@@ -29,7 +30,7 @@ public class HistoryController {
     public ResponseEntity<AuditedCommit> getHistoryBySha(@PathVariable String commitSha) {
         Optional<AuditedCommit> commit = repository.findById(commitSha);
         return commit.map(ResponseEntity::ok)
-                     .orElse(ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
@@ -44,15 +45,15 @@ public class HistoryController {
         }
 
         AuditedCommit auditedCommit = repository.findById(commitSha)
-            .orElse(new AuditedCommit(commitSha, repoUrl, analysisJson, tag));
+                .orElse(new AuditedCommit(commitSha, repoUrl, analysisJson, tag));
 
         auditedCommit.setAnalysisJson(analysisJson);
         if (tag != null) {
             auditedCommit.setTag(tag);
         }
-        
+
         AuditedCommit saved = repository.save(auditedCommit);
-        
+
         return ResponseEntity.ok(saved);
     }
 
@@ -63,7 +64,8 @@ public class HistoryController {
     @PatchMapping("/{commitSha}/tag")
     public ResponseEntity<?> updateTag(@PathVariable String commitSha, @RequestBody Map<String, String> payload) {
         String tag = payload.get("tag");
-        if (tag == null) return ResponseEntity.badRequest().build();
+        if (tag == null)
+            return ResponseEntity.badRequest().build();
 
         Optional<AuditedCommit> existing = repository.findById(commitSha);
         if (existing.isPresent()) {

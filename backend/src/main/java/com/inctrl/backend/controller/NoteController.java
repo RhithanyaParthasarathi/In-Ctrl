@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/notes")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "*")
 public class NoteController {
 
     private final NoteRepository noteRepository;
@@ -24,10 +24,11 @@ public class NoteController {
      * Returns 404 if no note exists yet.
      */
     @GetMapping("/{commitSha}")
-    public ResponseEntity<Note> getNoteByCommitShaAndSection(@PathVariable String commitSha, @RequestParam String section) {
+    public ResponseEntity<Note> getNoteByCommitShaAndSection(@PathVariable String commitSha,
+            @RequestParam String section) {
         Optional<Note> note = noteRepository.findByCommitShaAndSection(commitSha, section);
         return note.map(ResponseEntity::ok)
-                   .orElse(ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.notFound().build());
     }
 
     /**
@@ -37,8 +38,8 @@ public class NoteController {
     @PostMapping
     public ResponseEntity<Note> saveNote(@RequestBody Map<String, String> payload) {
         String commitSha = payload.get("commitSha");
-        String section   = payload.get("section");
-        String content   = payload.get("content");
+        String section = payload.get("section");
+        String content = payload.get("content");
 
         if (commitSha == null || commitSha.isBlank() || section == null || section.isBlank()) {
             return ResponseEntity.badRequest().build();

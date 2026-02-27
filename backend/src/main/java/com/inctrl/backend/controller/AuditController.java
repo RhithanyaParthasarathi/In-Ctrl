@@ -15,7 +15,7 @@ import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/audit")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "*")
 public class AuditController {
 
     private final GitHubService gitHubService;
