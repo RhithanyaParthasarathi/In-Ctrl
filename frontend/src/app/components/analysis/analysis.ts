@@ -121,6 +121,7 @@ export class AnalysisComponent implements OnInit {
                 const safeHtml = this.sanitizer.bypassSecurityTrustHtml(rawHtml);
                 this.chatMessages.push({ role: 'ai', content: safeHtml as string });
                 this.isChatLoading = false;
+                this.cdr.detectChanges();
             },
             error: (err: any) => {
                 this.chatMessages.push({
@@ -128,6 +129,7 @@ export class AnalysisComponent implements OnInit {
                     content: `<p style="color: #f87171;">⚠️ Failed to get a response. Please try again.</p>`
                 });
                 this.isChatLoading = false;
+                this.cdr.detectChanges();
             }
         });
     }
@@ -173,29 +175,35 @@ export class AnalysisComponent implements OnInit {
             return;
         }
 
-        // Serialize parsedNotes to JSON
-        this.commitNotes = JSON.stringify(this.parsedNotes);
+        try {
+            // Serialize parsedNotes to JSON
+            this.commitNotes = JSON.stringify(this.parsedNotes);
 
-        this.isNotesSaving = true;
-        this.notesSavedMessage = 'Saving...';
-        this.cdr.detectChanges();
+            this.isNotesSaving = true;
+            this.notesSavedMessage = 'Saving...';
+            this.cdr.detectChanges();
 
-        this.apiService.saveNote(this.commitSha, this.commitNotes, section).subscribe({
-            next: (res) => {
-                this.isNotesSaving = false;
-                this.notesSavedMessage = '✅ Saved';
-                this.cdr.detectChanges();
-                setTimeout(() => {
-                    this.notesSavedMessage = '';
+            this.apiService.saveNote(this.commitSha, this.commitNotes, section).subscribe({
+                next: (res) => {
+                    this.isNotesSaving = false;
+                    this.notesSavedMessage = 'Saved';
                     this.cdr.detectChanges();
-                }, 3000);
-            },
-            error: (err: any) => {
-                this.isNotesSaving = false;
-                this.notesSavedMessage = '⚠️ Failed: ' + (err.message || 'Server error');
-                this.cdr.detectChanges();
-            }
-        });
+                    setTimeout(() => {
+                        this.notesSavedMessage = '';
+                        this.cdr.detectChanges();
+                    }, 3000);
+                },
+                error: (err: any) => {
+                    this.isNotesSaving = false;
+                    this.notesSavedMessage = '⚠️ Failed: ' + (err.message || JSON.stringify(err));
+                    this.cdr.detectChanges();
+                }
+            });
+        } catch (e: any) {
+            this.isNotesSaving = false;
+            this.notesSavedMessage = '⚠️ Exception: ' + e.message;
+            this.cdr.detectChanges();
+        }
     }
 
     addNote() {
