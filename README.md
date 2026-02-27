@@ -43,9 +43,16 @@ git clone https://github.com/RhithanyaParthasarathi/In-Ctrl.git
 # 2. Enter the project directory
 cd In-Ctrl
 
-# 3. Boot the Frontend and Backend together (Inject your Gemini API Key)
-GEMINI_API_KEY="AIzaSyYourSecretKeyHere" docker-compose up -d
+# 3. Configure the AI Brain
+After cloning and moving into the `In-Ctrl` directory, create a new file named `.env` right there in the root folder (exactly where `docker-compose.yml` is present). Paste your Gemini API key inside it:
+```ini
+GEMINI_API_KEY="AIzaSyYourSecretKeyHere"
 ```
-*(Note for Windows PowerShell: If setting the variable inline fails, simply create a `.env` file inside the `backend/` folder containing `GEMINI_API_KEY=your-key` and then just run `docker-compose up -d`)*
+
+# 4. Boot the Application
+Run the following Docker Compose command to start both the frontend and backend:
+```bash
+docker-compose up -d
+```
 
 After running the commands, navigate to **http://localhost** in your browser to view the application!
