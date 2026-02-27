@@ -423,8 +423,12 @@
 
 .chat-messages {
     padding: 1.5rem 2rem;
-    height: 320px;
+    height: 400px;
+    /* Fixed height requested by user */
+    max-height: 400px;
+    /* Force it to stop expanding */
     overflow-y: auto;
+    /* Enable internal vertical scrolling */
     display: flex;
     flex-direction: column;
     gap: 1rem;
