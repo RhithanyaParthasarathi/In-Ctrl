@@ -461,6 +461,14 @@
 /* Commit D & E: AI Q&A Chat Styles                   */
 /* ================================================== */
 
+.chat-card {
+    display: flex;
+    flex-direction: column;
+    height: 600px;
+    /* Force the entire card to be a fixed height */
+    max-height: 600px;
+}
+
 .chat-card::before {
     background: linear-gradient(90deg, #6366f1, #8b5cf6, #a78bfa);
 }
