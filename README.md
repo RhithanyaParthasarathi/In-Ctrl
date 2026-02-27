@@ -1,4 +1,4 @@
-# In-Ctrl: AI Verification Documentor 🧠
+# In-Ctrl: AI Verification Documentor 
 
 **In-Ctrl** is a specialized dashboard designed to solve the "Hollow Commit" problem in AI-assisted software development. 
 
@@ -8,7 +8,7 @@ Rather than just asking an AI to write code, In-Ctrl forces the developer to und
 
 ---
 
-## 🚀 Tech Stack
+## Tech Stack
 *   **Backend:** Java 17, Spring Boot, Spring Web, Spring Data JPA
 *   **Database:** H2 In-Memory Database
 *   **Frontend:** Angular (TypeScript), RxJS, HTML/CSS
@@ -18,7 +18,7 @@ Rather than just asking an AI to write code, In-Ctrl forces the developer to und
 
 ---
 
-## 🎯 Features & Capabilities
+## Features & Capabilities
 
 ### 1. Unified Context Ingestion
 Users provide their GitHub repository URL and paste their raw AI chat logs (from ChatGPT, Claude, etc.). The backend fetches the raw commit diffs via the GitHub API and merges them with the AI instructions to provide full context to the analysis engine.
@@ -38,7 +38,7 @@ All summaries, alternative evaluations, and fault mitigations are compiled into 
 
 ---
 
-## 🐳 Running Locally (Docker Compose)
+## Running Locally (Docker Compose)
 
 The easiest way to run the entire In-Ctrl stack (Frontend + Backend + Database) is using Docker. You do not need Java or Node.js installed on your machine.
 
@@ -73,7 +73,7 @@ docker-compose up -d
 
 **5. Access the Dashboard**
 Open your web browser and navigate to:
-👉 **http://localhost**
+**http://localhost**
 
 ---
 
