@@ -80,8 +80,8 @@ export interface AuditedCommit {
   providedIn: 'root'
 })
 export class ApiService {
-  // URL of our Spring Boot Backend
-  private baseUrl = 'http://localhost:8080/api';
+  // Relative URL; relies on local Angular dev server proxy OR Docker Nginx proxy
+  private baseUrl = '/api';
 
   constructor(private http: HttpClient) { }
 
